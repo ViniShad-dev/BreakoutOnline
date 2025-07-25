@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\game-client.js",
+      "PackagePath": "staticwebassets\\game-client.js"
+    },
+    {
+      "Id": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\powerups.js",
+      "PackagePath": "staticwebassets\\powerups.js"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.BreakoutOnline.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.BreakoutOnline.props",
+      "PackagePath": "build\\BreakoutOnline.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.BreakoutOnline.props",
+      "PackagePath": "buildMultiTargeting\\BreakoutOnline.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.BreakoutOnline.props",
+      "PackagePath": "buildTransitive\\BreakoutOnline.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -1,0 +1,1195 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Breakout Duo - Online</title>
+    <style>
+        :root {
+            --bg-dark: #1E1E1E;
+            --bg-medium: #2D2D2D;
+            --bg-light: #3C3C3C;
+            --text-primary: #EAEAEA;
+            --text-secondary: #AAAAAA;
+            --accent-blue: #007BFF;
+            --accent-red: #E74C3C;
+            --accent-green: #2ECC71;
+            --accent-orange: #F39C12;
+            --accent-yellow: #ffeb3b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-y: auto;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: var(--text-primary);
+            font-size: 1.2em;
+        }
+
+        .loader-animation {
+            width: 100px;
+            height: 40px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .loader-paddle {
+            width: 80px;
+            height: 10px;
+            background-color: var(--accent-blue);
+            border-radius: 5px;
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+        }
+
+        .loader-ball {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            position: absolute;
+            left: 45px;
+            animation: bounce 0.8s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from {
+                top: 0;
+            }
+
+            to {
+                top: 20px;
+            }
+        }
+
+        #game-area {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .game-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-direction: column;
+        }
+
+        .game-board {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            background: #000;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .side-panel {
+            width: 200px;
+            padding: 20px;
+            background-color: var(--bg-medium);
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid var(--bg-light);
+        }
+
+        .energy-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--bg-light);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .energy-bar {
+            width: 100%;
+            height: 100%;
+            background-color: var(--accent-blue);
+            transition: width 0.2s linear;
+        }
+
+        #overlay-container {
+            width: 900px;
+            height: 650px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            pointer-events: none;
+        }
+
+            #overlay-container > .screen-overlay, #profile-btn {
+                pointer-events: auto;
+            }
+
+        .screen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            font-size: 20px;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+            .screen-overlay h2 {
+                margin: 0 0 15px 0;
+                font-size: 32px;
+                font-weight: 600;
+                flex-shrink: 0;
+            }
+
+        .centered-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .screen-overlay input, .screen-overlay select, .screen-overlay button {
+            border-radius: 6px;
+            border: 1px solid var(--bg-light);
+            background-color: var(--bg-medium);
+            color: var(--text-primary);
+            font-size: 16px;
+            padding: 12px;
+            margin: 8px 0;
+            width: 280px;
+            transition: all 0.2s ease;
+        }
+
+            .screen-overlay button:hover {
+                background-color: var(--bg-light);
+            }
+
+        .password-container {
+            position: relative;
+            width: 280px;
+        }
+
+            .password-container input {
+                width: 100%;
+                padding-right: 40px;
+            }
+
+        .toggle-password {
+            position: absolute;
+            right: 1px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            color: var(--text-secondary);
+            font-size: 18px !important;
+            width: auto !important;
+        }
+
+        #room-list-container {
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--bg-light);
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        .room-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid var(--bg-light);
+            cursor: pointer;
+        }
+
+            .room-item:hover {
+                background-color: var(--bg-light);
+            }
+
+        .lobby-content-wrapper {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            flex-grow: 1;
+            gap: 20px;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+        .lobby-main-panel {
+            flex: 2;
+            display: flex;
+            gap: 20px;
+            background-color: var(--bg-medium);
+            border: 1px solid var(--bg-light);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .lobby-roles-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .lobby-actions-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lobby-playerlist-panel {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--bg-medium);
+            border: 1px solid var(--bg-light);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .role-slot {
+            background-color: var(--bg-dark);
+            border: 1px solid var(--bg-light);
+            border-radius: 6px;
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .role-slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .role-slot-header b {
+                font-size: 16px;
+            }
+
+        .role-slot-content {
+            margin-top: 5px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .role-slot ul {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0 0;
+        }
+
+        .player-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .player-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid var(--bg-light);
+            font-size: 14px;
+        }
+
+            .player-list-item:last-child {
+                border-bottom: none;
+            }
+
+        .player-info-text .status {
+            font-size: 12px;
+            color: var(--accent-yellow);
+            font-style: italic;
+        }
+
+        .action-btn {
+            font-size: 12px !important;
+            padding: 4px 8px !important;
+            width: auto !important;
+            margin: 0 !important;
+            background-color: var(--bg-light);
+            border: 1px solid var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .kick-btn {
+            background-color: var(--accent-red);
+            color: white;
+            border: none;
+            font-size: 12px !important;
+            padding: 4px 10px !important;
+            width: auto !important;
+            margin: 0 !important;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+            .kick-btn:hover {
+                opacity: 1;
+            }
+
+        .host-settings {
+            padding: 15px;
+            border: 1px dashed var(--bg-light);
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: left;
+            justify-content: flex-start;
+        }
+
+            .host-settings h6 {
+                margin: 0 0 10px 0;
+            }
+
+            .host-settings div {
+                margin-top: 8px;
+            }
+
+        .start-match-container {
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+        .profile-panel {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--bg-medium);
+            border: 1px solid var(--bg-light);
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 15px 20px;
+            text-align: left;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .profile-grid-label {
+            font-weight: bold;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        .profile-grid-value {
+            color: var(--text-primary);
+        }
+
+        .profile-title {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        #profile-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 0;
+            z-index: 25;
+        }
+
+        .instructions-container {
+            padding: 10px 15px;
+            border: 1px solid var(--bg-light);
+            background-color: var(--bg-medium);
+            border-radius: 8px;
+            text-align: left;
+        }
+
+            .instructions-container p {
+                font-size: 13px;
+                margin: 4px 0;
+            }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay" class="hidden">
+        <div class="loader-animation">
+            <div class="loader-paddle"></div>
+            <div class="loader-ball"></div>
+        </div>
+        <div id="loading-message">Carregando...</div>
+    </div>
+    <div id="game-area" class="hidden">
+        <div class="game-container">
+            <div class="game-board">
+                <div id="stats-panel-left" class="side-panel">
+                    <h3 id="player2-name">Jogador 2</h3>
+                    <p>Pontos: <span id="p2-score">0</span></p>
+                    <div id="p2-lives" class="hidden">Vidas: <span id="p2-lives-count">0</span></div>
+                    <div class="energy-bar-container"><div id="p2-energy-bar" class="energy-bar"></div></div>
+                </div>
+                <div class="canvas-wrapper">
+                    <div id="score-goal" style="color: var(--text-secondary); font-size: 16px;">Meta: 0</div>
+                    <div id="game-timer" style="color: var(--text-primary); font-size: 24px; margin-bottom: 5px;">Tempo: 00:00</div>
+                    <canvas id="gameCanvas" width="600" height="450"></canvas>
+                </div>
+                <div id="stats-panel-right" class="side-panel">
+                    <h3 id="player1-name">Jogador 1</h3>
+                    <p>Pontos: <span id="p1-score">0</span></p>
+                    <div id="p1-lives" class="hidden">Vidas: <span id="p1-lives-count">0</span></div>
+                    <div class="energy-bar-container"><div id="p1-energy-bar" class="energy-bar"></div></div>
+                </div>
+            </div>
+            <div id="instructions-container" class="instructions-container">
+                <h4>Controles e Power-ups</h4>
+                <p><b>Movimento:</b> Setas Esquerda/Direita ou Teclas A/D</p>
+                <p><b>Dash (Impulso):</b> Pressione e segure [Shift]</p>
+                <p><b>Pause (Jogo Solo):</b> Pressione [Esc]</p>
+                <p><b>Power-ups:</b> ↔️ Raquete Maior | ⚡ Bola Rápida | 👻 Bola Invisível | 🤏 Raquete Inimiga Menor | 🌀 Teleporte da Bola</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-container">
+        <button id="profile-btn" class="hidden">Meu Perfil</button>
+
+        <div id="entry-screen" class="screen-overlay">
+            <div class="centered-content">
+                <h2>Breakout Duo Online</h2>
+                <button id="show-login-btn">Entrar</button>
+                <button id="show-register-btn">Criar Conta</button>
+                <button id="guest-btn">Jogar como Convidado</button>
+            </div>
+        </div>
+
+        <div id="login-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Entrar na Conta</h2>
+                <input type="text" id="login-username" placeholder="Usuário" maxlength="15">
+                <div class="password-container">
+                    <input type="password" id="login-password" placeholder="Senha">
+                    <button type="button" class="toggle-password">👁️</button>
+                </div>
+                <button id="login-btn">Confirmar</button>
+                <button class="back-to-entry">Voltar</button>
+            </div>
+        </div>
+
+        <div id="register-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Criar Nova Conta</h2>
+                <input type="text" id="register-username" placeholder="Usuário (máx 15 caracteres)" maxlength="15">
+                <div class="password-container">
+                    <input type="password" id="register-password" placeholder="Senha">
+                    <button type="button" class="toggle-password">👁️</button>
+                </div>
+                <div class="password-container">
+                    <input type="password" id="register-confirm-password" placeholder="Confirmar Senha">
+                    <button type="button" class="toggle-password">👁️</button>
+                </div>
+                <button id="register-btn">Confirmar</button>
+                <button class="back-to-entry">Voltar</button>
+            </div>
+        </div>
+
+        <div id="guest-nickname-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Nickname de Convidado</h2><p>Escolha seu nome para esta sessão.</p>
+                <input type="text" id="guest-nickname-input" placeholder="Seu nome" maxlength="15">
+                <button id="confirm-guest-nickname-btn">Confirmar</button>
+                <button class="back-to-entry">Voltar</button>
+            </div>
+        </div>
+
+        <div id="main-menu-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Menu Principal</h2>
+                <button id="singleplayer-btn">Single Player</button>
+                <button id="multiplayer-btn">Multiplayer</button>
+            </div>
+        </div>
+
+        <div id="profile-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Perfil do Jogador</h2>
+                <div class="profile-panel">
+                    <div class="profile-grid">
+                        <div class="profile-grid-label">Usuário:</div>
+                        <div class="profile-grid-value" id="profile-username"></div>
+
+                        <div class="profile-grid-label">Título:</div>
+                        <div class="profile-grid-value" id="profile-title"></div>
+
+                        <div class="profile-grid-label">Na ativa desde:</div>
+                        <div class="profile-grid-value" id="profile-regdate"></div>
+
+                        <div class="profile-grid-label">Recorde (Sobrevivência):</div>
+                        <div class="profile-grid-value" id="profile-survival-hs"></div>
+                    </div>
+                </div>
+                <button class="back-to-main-menu" style="margin-top: 20px;">Voltar</button>
+            </div>
+        </div>
+
+        <div id="sp-mode-selection-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Modo Single Player</h2>
+                <button id="sp-classic-btn">Partida Clássica</button>
+                <button id="sp-survival-btn">Maratona de Sobrevivência</button>
+                <button class="back-to-main-menu">Voltar</button>
+            </div>
+        </div>
+
+        <div id="singleplayer-settings-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2 id="sp-settings-title">Configurar Partida</h2>
+                <div id="sp-classic-settings">
+                    <label for="sp-score-limit">Pontos para Vencer:</label>
+                    <input type="number" id="sp-score-limit" value="5" min="1" max="20">
+                    <label for="sp-time-limit">Duração (minutos):</label>
+                    <input type="number" id="sp-time-limit" value="3" min="1" max="10">
+                </div>
+                <label for="sp-ai-difficulty">Dificuldade da IA:</label>
+                <select id="sp-ai-difficulty">
+                    <option value="1">Fácil</option>
+                    <option value="2" selected>Normal</option>
+                    <option value="3">Difícil</option>
+                </select>
+                <button id="start-sp-btn">Iniciar Jogo</button>
+                <button id="back-to-sp-menu">Voltar</button>
+            </div>
+        </div>
+        <div id="room-list-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Salas Online</h2>
+                <div id="room-list-container"></div>
+                <button id="create-room-btn">Criar Sala</button><button class="back-to-main-menu">Voltar</button>
+            </div>
+        </div>
+        <div id="create-room-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Criar Nova Sala</h2>
+                <input type="text" id="create-room-name" placeholder="Nome da Sala" maxlength="20">
+                <input type="password" id="create-room-password" placeholder="Senha (deixe em branco para pública)">
+                <button id="confirm-create-room-btn">Criar e Entrar</button><button class="back-to-room-list">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="lobby-screen" class="screen-overlay hidden">
+            <h2 id="lobby-room-name"></h2>
+            <div class="lobby-content-wrapper">
+                <div class="lobby-main-panel">
+                    <div class="lobby-roles-panel" id="lobby-roles-panel"></div>
+                    <div class="lobby-actions-panel" id="lobby-actions-panel"></div>
+                </div>
+                <div class="lobby-playerlist-panel" id="lobby-playerlist-panel"></div>
+            </div>
+            <button id="leave-room-btn" style="position:absolute; top:10px; right: 10px; width:auto; padding: 5px 10px; font-size: 14px;">Sair da Sala</button>
+        </div>
+
+        <div id="post-game-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2 id="post-game-title">Vitória!</h2>
+                <p id="post-game-message">Uma performance de mestre!</p>
+                <button id="back-to-lobby-btn">Continuar</button>
+            </div>
+        </div>
+        <div id="pause-screen" class="screen-overlay hidden">
+            <div class="centered-content">
+                <h2>Pausado</h2>
+                <button id="resume-btn">Retornar ao Jogo</button>
+                <button id="quit-to-menu-btn">Sair para o Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="game-client.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let playerInfo = { nickname: "Convidado", id: null, title: null };
+            let connection = null;
+            let currentRoom = null;
+            let gameMode = null;
+            let isPaused = false;
+            const screens = {
+                entry: document.getElementById('entry-screen'),
+                login: document.getElementById('login-screen'),
+                register: document.getElementById('register-screen'),
+                guestNickname: document.getElementById('guest-nickname-screen'),
+                mainMenu: document.getElementById('main-menu-screen'),
+                profile: document.getElementById('profile-screen'),
+                spModeSelection: document.getElementById('sp-mode-selection-screen'),
+                singleplayerSettings: document.getElementById('singleplayer-settings-screen'),
+                roomList: document.getElementById('room-list-screen'),
+                createRoom: document.getElementById('create-room-screen'),
+                lobby: document.getElementById('lobby-screen'),
+                postGame: document.getElementById('post-game-screen'),
+                pause: document.getElementById('pause-screen')
+            };
+            const gameArea = document.getElementById('game-area');
+            const overlayContainer = document.getElementById('overlay-container');
+            const showLoginBtn = document.getElementById('show-login-btn');
+            const showRegisterBtn = document.getElementById('show-register-btn');
+            const guestBtn = document.getElementById('guest-btn');
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            const confirmGuestNicknameBtn = document.getElementById('confirm-guest-nickname-btn');
+            const backToEntryBtns = document.querySelectorAll('.back-to-entry');
+            const togglePasswordBtns = document.querySelectorAll('.toggle-password');
+            const singlePlayerBtn = document.getElementById('singleplayer-btn');
+            const startSpBtn = document.getElementById('start-sp-btn');
+            const multiplayerBtn = document.getElementById('multiplayer-btn');
+            const profileBtn = document.getElementById('profile-btn');
+            const createRoomBtn = document.getElementById('create-room-btn');
+            const confirmCreateRoomBtn = document.getElementById('confirm-create-room-btn');
+            const leaveRoomBtn = document.getElementById('leave-room-btn');
+            const backToLobbyBtn = document.getElementById('back-to-lobby-btn');
+            const resumeBtn = document.getElementById('resume-btn');
+            const quitToMenuBtn = document.getElementById('quit-to-menu-btn');
+            const backToMenuBtns = document.querySelectorAll('.back-to-main-menu');
+            const backToRoomListBtns = document.querySelectorAll('.back-to-room-list');
+            const spClassicBtn = document.getElementById('sp-classic-btn');
+            const spSurvivalBtn = document.getElementById('sp-survival-btn');
+            const backToSpMenuBtn = document.getElementById('back-to-sp-menu');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const loadingMessage = document.getElementById('loading-message');
+
+            function showLoading(message) {
+                loadingMessage.textContent = message || 'Carregando...';
+                loadingOverlay.classList.remove('hidden');
+            }
+
+            function hideLoading() {
+                loadingOverlay.classList.add('hidden');
+            }
+
+            GameClient.initialize({
+                canvas: document.getElementById('gameCanvas'),
+                p1Score: document.getElementById('p1-score'), p2Score: document.getElementById('p2-score'),
+                p1Lives: document.getElementById('p1-lives-count'), p2Lives: document.getElementById('p2-lives-count'),
+                p1LivesContainer: document.getElementById('p1-lives'), p2LivesContainer: document.getElementById('p2-lives'),
+                timer: document.getElementById('game-timer'),
+                p1Energy: document.getElementById('p1-energy-bar'), p2Energy: document.getElementById('p2-energy-bar'),
+                scoreGoal: document.getElementById('score-goal')
+            });
+
+            showLoginBtn.addEventListener('click', () => showScreen('login'));
+            showRegisterBtn.addEventListener('click', () => showScreen('register'));
+            guestBtn.addEventListener('click', () => showScreen('guestNickname'));
+            backToEntryBtns.forEach(btn => btn.addEventListener('click', () => showScreen('entry')));
+
+            togglePasswordBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const passwordInput = btn.previousElementSibling;
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        btn.textContent = '🙈';
+                    } else {
+                        passwordInput.type = 'password';
+                        btn.textContent = '👁️';
+                    }
+                });
+            });
+
+            confirmGuestNicknameBtn.addEventListener('click', () => {
+                const name = document.getElementById('guest-nickname-input').value.trim();
+                if (name) {
+                    playerInfo.nickname = name;
+                    showScreen('mainMenu');
+                } else {
+                    alert('Por favor, digite um nickname.');
+                }
+            });
+
+            registerBtn.addEventListener('click', async () => {
+                const username = document.getElementById('register-username').value.trim();
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+                if (!username || !password) { return alert('Usuário e senha são obrigatórios.'); }
+                if (password !== confirmPassword) { return alert('As senhas não coincidem.'); }
+
+                showLoading('Criando sua conta...');
+                try {
+                    await connectToServer();
+                    const result = await connection.invoke("Register", username, password);
+                    if (result.success) {
+                        alert(result.message);
+                        playerInfo.nickname = result.user.username;
+                        playerInfo.id = result.user.id;
+                        playerInfo.title = result.user.title;
+                        showScreen('mainMenu');
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (err) {
+                    console.error("Erro ao registrar:", err);
+                    alert("Ocorreu um erro de comunicação ao tentar registrar. Verifique o console.");
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            loginBtn.addEventListener('click', async () => {
+                const username = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value;
+                if (!username || !password) { return alert('Usuário e senha são obrigatórios.'); }
+
+                showLoading('Entrando...');
+                try {
+                    await connectToServer();
+                    const result = await connection.invoke("Login", username, password);
+                    if (result.success) {
+                        playerInfo.nickname = result.user.username;
+                        playerInfo.id = result.user.id;
+                        playerInfo.title = result.user.title;
+                        showScreen('mainMenu');
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (err) {
+                    console.error("Erro ao fazer login:", err);
+                    alert("Ocorreu um erro de comunicação ao tentar entrar. Verifique o console.");
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            function showScreen(screenName) {
+                Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+
+                const isGameRunning = !gameArea.classList.contains('hidden');
+
+                if (screenName) {
+                    overlayContainer.classList.remove('hidden');
+                    screens[screenName].classList.remove('hidden');
+                } else {
+                    overlayContainer.classList.add('hidden');
+                }
+
+                const showProfileButton = playerInfo.id && screenName === 'mainMenu';
+                profileBtn.classList.toggle('hidden', !showProfileButton);
+            }
+
+            profileBtn.addEventListener('click', async () => {
+                showLoading('Carregando perfil...');
+                try {
+                    await connectToServer();
+                    const profileData = await connection.invoke("GetMyProfileData");
+                    if (profileData) {
+                        document.getElementById('profile-username').textContent = profileData.username;
+                        document.getElementById('profile-regdate').textContent = profileData.registrationDate;
+                        const titleEl = document.getElementById('profile-title');
+                        if (profileData.title) {
+                            titleEl.innerHTML = `<span class="profile-title">${profileData.title}</span>`;
+                        } else {
+                            titleEl.textContent = 'Nenhum';
+                        }
+                        const survivalHighScore = profileData.survivalHighScore || 0;
+                        const minutes = Math.floor(survivalHighScore / 60);
+                        const seconds = Math.floor(survivalHighScore % 60);
+                        document.getElementById('profile-survival-hs').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                        showScreen('profile');
+                    } else {
+                        alert('Não foi possível carregar os dados do perfil. Tente fazer login novamente.');
+                    }
+                } catch (err) {
+                    console.error("Erro ao buscar perfil:", err);
+                    alert("Ocorreu um erro de comunicação ao buscar seu perfil.");
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            function updateScoreboardNames(room) {
+                const p1 = Object.values(room.players).find(p => p.role === 1);
+                const p2 = Object.values(room.players).find(p => p.role === 2);
+                document.getElementById('player1-name').innerText = p1 ? p1.nickname : 'Jogador 1';
+                document.getElementById('player2-name').innerText = p2 ? p2.nickname : 'Jogador 2';
+            }
+            function connectToServer(onConnectedCallback) {
+                if (connection && connection.state === "Connected") { if (onConnectedCallback) onConnectedCallback(); return Promise.resolve(); }
+                if (connection && connection.state !== "Disconnected") { return Promise.resolve(); }
+                connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
+                connection.on("ReceiveRoomList", updateRoomList);
+                connection.on("JoinedRoom", onJoinedRoom);
+                connection.on("UpdateRoom", onUpdateRoom);
+                connection.on("Error", (message) => alert(`Erro: ${message}`));
+                connection.on("Kicked", (message) => { alert(message); currentRoom = null; showScreen('roomList'); });
+                connection.on("MatchStarted", (room) => {
+                    currentRoom = room;
+                    updateScoreboardNames(room);
+                    GameClient.setScoreLimit(room.scoreLimit);
+                    showScreen(null);
+                    gameArea.classList.remove('hidden');
+                });
+                connection.on("GameStateUpdate", (gs) => { GameClient.updateGameState(gs); });
+                connection.on("MatchEnded", (data) => {
+                    isPaused = false;
+                    GameClient.updateGameState(null);
+                    gameArea.classList.add('hidden');
+                    const titleEl = document.getElementById('post-game-title');
+                    const messageEl = document.getElementById('post-game-message');
+                    if (data.result === 'survival_end') {
+                        titleEl.innerText = "Fim de Jogo!";
+                        titleEl.style.color = "var(--text-primary)";
+                        messageEl.innerText = data.message;
+                    } else if (data.result === 'victory') {
+                        titleEl.innerText = "🎉 Vitória! 🎉";
+                        titleEl.style.color = "var(--accent-green)";
+                        messageEl.innerText = "Uma performance de mestre!";
+                    } else if (data.result === 'defeat') {
+                        titleEl.innerText = "Derrota";
+                        titleEl.style.color = "var(--accent-red)";
+                        messageEl.innerText = "Não foi desta vez.";
+                    } else {
+                        titleEl.innerText = "Empate!";
+                        titleEl.style.color = "var(--accent-yellow)";
+                        messageEl.innerText = "A batalha foi intensa!";
+                    }
+                    showScreen('postGame');
+                });
+
+                return connection.start().then(() => {
+                    console.log("Conectado ao servidor.");
+                    if (onConnectedCallback) onConnectedCallback();
+                }).catch(err => console.error(err.toString()));
+            }
+            function onJoinedRoom(room) { currentRoom = room; gameMode = 'multiplayer'; showScreen('lobby'); updateLobbyView(); }
+            function onUpdateRoom(room) {
+                const wasHost = currentRoom ? connection.connectionId === currentRoom.hostConnectionId : false;
+                currentRoom = room;
+                const amIHost = connection.connectionId === currentRoom.hostConnectionId;
+                if (amIHost && !wasHost) { alert("Você agora é o novo dono da sala!"); }
+                if (!screens.lobby.classList.contains('hidden')) { updateLobbyView(); }
+            }
+            function updateRoomList(rooms) {
+                const container = document.getElementById('room-list-container');
+                container.innerHTML = '';
+                if (!rooms || rooms.length === 0) { container.innerHTML = '<p style="padding: 10px;">Nenhuma sala encontrada.</p>'; return; }
+                rooms.forEach(room => {
+                    const roomElement = document.createElement('div');
+                    roomElement.className = 'room-item';
+                    const lockIcon = !room.isPublic ? ' 🔒' : '';
+                    roomElement.innerHTML = `<span>${room.name}${lockIcon}</span><span>${room.playersCount} / 4</span>`;
+                    roomElement.onclick = () => {
+                        let password = "";
+                        if (!room.isPublic) { password = prompt(`A sala "${room.name}" é privada. Digite a senha:`); if (password === null) return; }
+                        connectToServer().then(() => {
+                            connection.invoke("JoinRoom", room.id, playerInfo.nickname, password);
+                        });
+                    };
+                    container.appendChild(roomElement);
+                });
+            }
+
+            function updateLobbyView() {
+                if (!currentRoom) return;
+
+                const amIHost = connection.connectionId === currentRoom.hostConnectionId;
+                const p1 = Object.values(currentRoom.players).find(p => p.role === 1);
+                const p2 = Object.values(currentRoom.players).find(p => p.role === 2);
+                const spectators = Object.values(currentRoom.players).filter(p => p.role === 3);
+                const allPlayers = Object.values(currentRoom.players);
+                const allHumansReturned = allPlayers.every(p => p.isAI || p.hasReturnedToLobby);
+
+                const rolesPanel = document.getElementById('lobby-roles-panel');
+                const actionsPanel = document.getElementById('lobby-actions-panel');
+                const playerListPanel = document.getElementById('lobby-playerlist-panel');
+                rolesPanel.innerHTML = ''; actionsPanel.innerHTML = ''; playerListPanel.innerHTML = '';
+
+                document.getElementById('lobby-room-name').innerText = currentRoom.name;
+
+                const roleNames = { 0: '(Na sala)', 1: '(Jogador 1)', 2: '(Jogador 2)', 3: '(Espectador)' };
+
+                const createRoleSlot = (title, player, roleNum) => {
+                    const slot = document.createElement('div');
+                    slot.className = 'role-slot';
+                    const header = document.createElement('div');
+                    header.className = 'role-slot-header';
+                    header.innerHTML = `<b>${title}</b>`;
+                    const content = document.createElement('div');
+                    content.className = 'role-slot-content';
+
+                    if (player) {
+                        content.innerText = player.nickname;
+                        if (player.connectionId === connection.connectionId) {
+                            const leaveBtn = document.createElement('button');
+                            leaveBtn.className = 'action-btn';
+                            leaveBtn.innerText = 'Sair do Papel';
+                            leaveBtn.onclick = () => connection.invoke("LeaveRole");
+                            header.appendChild(leaveBtn);
+                        } else if (amIHost) {
+                            const removeBtn = document.createElement('button');
+                            removeBtn.className = 'action-btn';
+                            if (player.isAI) {
+                                removeBtn.innerText = 'Remover IA';
+                                removeBtn.onclick = () => connection.invoke("RemoveAIPlayer", player.connectionId);
+                            } else {
+                                removeBtn.innerText = 'Remover do Papel';
+                                removeBtn.onclick = () => connection.invoke("RemoveFromRole", player.connectionId);
+                            }
+                            header.appendChild(removeBtn);
+                        }
+                    } else {
+                        content.innerHTML = `<span style="color:var(--text-secondary);">Vazio</span>`;
+                        if (amIHost && roleNum > 0) {
+                            const addAIBtn = document.createElement('button');
+                            addAIBtn.className = 'action-btn';
+                            addAIBtn.innerText = 'Adicionar IA';
+                            addAIBtn.onclick = () => {
+                                const diff = prompt("Dificuldade da IA (1-Fácil, 2-Normal, 3-Difícil):", "2");
+                                if (diff && ['1', '2', '3'].includes(diff)) connection.invoke("AddAI", roleNum, parseInt(diff));
+                            };
+                            header.appendChild(addAIBtn);
+                        }
+                    }
+                    slot.appendChild(header); slot.appendChild(content);
+                    return slot;
+                };
+
+                rolesPanel.appendChild(createRoleSlot('Jogador 1', p1, 1));
+                rolesPanel.appendChild(createRoleSlot('Jogador 2', p2, 2));
+
+                const specSlot = document.createElement('div');
+                specSlot.className = 'role-slot';
+                specSlot.innerHTML = `<div><b>Espectadores (${spectators.length})</b></div>`;
+                const specContent = document.createElement('div');
+                specContent.className = 'role-slot-content';
+                if (spectators.length > 0) {
+                    const specList = document.createElement('ul');
+                    spectators.forEach(s => {
+                        const li = document.createElement('li');
+                        li.innerText = s.nickname;
+                        specList.appendChild(li);
+                    });
+                    specContent.appendChild(specList);
+                } else {
+                    specContent.innerHTML = `<span style="color:var(--text-secondary); font-size: 12px; font-style: italic;">Nenhum espectador.</span>`;
+                }
+                specSlot.appendChild(specContent);
+                rolesPanel.appendChild(specSlot);
+
+                const hostSettingsDiv = document.createElement('div');
+                hostSettingsDiv.className = 'host-settings';
+                hostSettingsDiv.classList.toggle('hidden', !amIHost);
+                hostSettingsDiv.innerHTML = `<h6>Configurações da Partida 👑</h6>
+                                                 <div><label>Pontos:</label><input type="number" id="score-limit-input" value="${currentRoom.scoreLimit}" min="1" max="20" style="width:60px; padding:5px;"></div>
+                                                 <div><label>Tempo:</label><input type="number" id="time-limit-input" value="${currentRoom.timeLimit / 60}" min="1" max="10" style="width:60px; padding:5px;"></div>`;
+                rolesPanel.appendChild(hostSettingsDiv);
+                hostSettingsDiv.querySelector('#score-limit-input').addEventListener('change', updateSettings);
+                hostSettingsDiv.querySelector('#time-limit-input').addEventListener('change', updateSettings);
+
+                const roleSelectionDiv = document.createElement('div');
+                roleSelectionDiv.innerHTML = `<h4>Escolha seu papel</h4>`;
+                roleSelectionDiv.innerHTML += `<button class="role-btn" data-role="1" ${p1 ? 'disabled' : ''}>Ser Jogador 1</button>
+                                                   <button class="role-btn" data-role="2" ${p2 ? 'disabled' : ''}>Ser Jogador 2</button>
+                                                   <button class="role-btn" data-role="3">Ser Espectador</button>`;
+                actionsPanel.appendChild(roleSelectionDiv);
+                roleSelectionDiv.querySelectorAll('.role-btn').forEach(btn => btn.addEventListener('click', () => connection.invoke("ChooseRole", parseInt(btn.dataset.role, 10))));
+
+                const startMatchContainer = document.createElement('div');
+                startMatchContainer.className = 'start-match-container';
+                startMatchContainer.classList.toggle('hidden', !amIHost);
+                const startBtn = document.createElement('button');
+                startBtn.disabled = !p1 || !p2 || !allHumansReturned;
+                if (!allHumansReturned) { startBtn.innerText = 'Aguardando Jogadores'; }
+                else if (!p1 || !p2) { startBtn.innerText = 'Defina os Jogadores'; }
+                else { startBtn.innerText = 'Iniciar Partida'; }
+                startMatchContainer.appendChild(startBtn);
+                actionsPanel.appendChild(startMatchContainer);
+                startBtn.addEventListener('click', () => connection.invoke("StartMatch"));
+
+                playerListPanel.innerHTML = `<h5>Todos na Sala (${allPlayers.length})</h5>`;
+                const playerListDiv = document.createElement('div');
+                playerListDiv.className = 'player-list-container';
+
+                allPlayers.forEach(p => {
+                    const item = document.createElement('div');
+                    item.className = 'player-list-item';
+                    const info = document.createElement('div');
+                    info.className = 'player-info-text';
+                    const hostIcon = p.connectionId === currentRoom.hostConnectionId ? ' 👑' : '';
+                    info.innerHTML = `<span>${p.nickname}${hostIcon} <span style="color: var(--text-secondary);">${roleNames[p.role] || ''}</span></span>`;
+
+                    if (!p.hasReturnedToLobby && !p.isAI) {
+                        info.innerHTML += `<span class="status">Aguardando retorno...</span>`;
+                    }
+                    item.appendChild(info);
+
+                    if (amIHost && p.connectionId !== connection.connectionId) {
+                        const kickBtn = document.createElement('button');
+                        kickBtn.className = 'kick-btn';
+                        kickBtn.innerText = 'Expulsar';
+                        kickBtn.onclick = () => connection.invoke("KickPlayer", p.connectionId);
+                        item.appendChild(kickBtn);
+                    }
+                    playerListDiv.appendChild(item);
+                });
+                playerListPanel.appendChild(playerListDiv);
+            }
+
+            function gameLoop() {
+                if (gameMode && !isPaused && connection && connection.state === "Connected") {
+                    connection.invoke("UpdateInput", GameClient.getInput());
+                }
+                GameClient.draw();
+                requestAnimationFrame(gameLoop);
+            }
+            function togglePause() {
+                if (gameMode !== 'singleplayer' || gameArea.classList.contains('hidden')) return;
+                isPaused = !isPaused;
+                if (isPaused) { showScreen('pause'); }
+                else { showScreen(null); }
+                if (connection) connection.invoke("TogglePause", isPaused);
+            }
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { togglePause(); } });
+
+            singlePlayerBtn.addEventListener('click', () => {
+                gameMode = 'singleplayer';
+                showScreen('spModeSelection');
+            });
+
+            spClassicBtn.addEventListener('click', () => {
+                document.getElementById('sp-settings-title').innerText = "Configurar Partida Clássica";
+                document.getElementById('sp-classic-settings').classList.remove('hidden');
+                document.getElementById('start-sp-btn').onclick = () => {
+                    const scoreLimit = parseInt(document.getElementById('sp-score-limit').value, 10);
+                    const aiDifficulty = parseInt(document.getElementById('sp-ai-difficulty').value, 10);
+                    const timeLimit = parseInt(document.getElementById('sp-time-limit').value, 10);
+                    connectToServer().then(() => {
+                        connection.invoke("StartSinglePlayerMatch", playerInfo.nickname, aiDifficulty, timeLimit, scoreLimit);
+                    });
+                };
+                showScreen('singleplayerSettings');
+            });
+
+            spSurvivalBtn.addEventListener('click', () => {
+                document.getElementById('sp-settings-title').innerText = "Configurar Maratona";
+                document.getElementById('sp-classic-settings').classList.add('hidden');
+                document.getElementById('start-sp-btn').onclick = () => {
+                    const aiDifficulty = parseInt(document.getElementById('sp-ai-difficulty').value, 10);
+                    connectToServer().then(() => {
+                        connection.invoke("StartSurvivalMatch", playerInfo.nickname, aiDifficulty);
+                    });
+                };
+                showScreen('singleplayerSettings');
+            });
+
+            backToSpMenuBtn.addEventListener('click', () => showScreen('spModeSelection'));
+
+            multiplayerBtn.addEventListener('click', () => {
+                gameMode = 'multiplayer';
+                connectToServer().then(() => {
+                    connection.invoke("GetRoomList");
+                    showScreen('roomList');
+                });
+            });
+            backToLobbyBtn.addEventListener('click', () => {
+                if (gameMode === 'multiplayer' && connection) {
+                    connection.invoke("ReturnToLobby");
+                    showScreen('lobby');
+                } else {
+                    gameMode = null;
+                    showScreen('mainMenu');
+                }
+            });
+            createRoomBtn.addEventListener('click', () => showScreen('createRoom'));
+
+            resumeBtn.addEventListener('click', togglePause);
+            quitToMenuBtn.addEventListener('click', () => {
+                if (connection) connection.invoke("LeaveRoom");
+                isPaused = false; gameMode = null; gameArea.classList.add('hidden');
+                showScreen('mainMenu');
+            });
+            backToMenuBtns.forEach(btn => btn.addEventListener('click', () => {
+                showScreen('mainMenu');
+            }));
+            backToRoomListBtns.forEach(btn => btn.addEventListener('click', () => showScreen('roomList')));
+            confirmCreateRoomBtn.addEventListener('click', () => {
+                const roomName = document.getElementById('create-room-name').value.trim();
+                const password = document.getElementById('create-room-password').value;
+                if (roomName) {
+                    connectToServer().then(() => {
+                        connection.invoke("CreateRoom", roomName, playerInfo.nickname, password || null);
+                    });
+                } else {
+                    alert("Por favor, dê um nome à sala.");
+                }
+            });
+            leaveRoomBtn.addEventListener('click', () => { if (connection) { connection.invoke("LeaveRoom"); currentRoom = null; showScreen('roomList'); } });
+
+            function updateSettings() {
+                const score = parseInt(document.getElementById('score-limit-input').value);
+                const time = parseInt(document.getElementById('time-limit-input').value);
+                if (connection) connection.invoke("UpdateRoomSettings", score, time);
+            }
+
+            showScreen('entry');
+            gameLoop();
+        });
+    </script>
+</body>
+</html>

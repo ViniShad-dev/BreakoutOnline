@@ -1,0 +1,77 @@
+{
+  "Version": 1,
+  "Hash": "+dMZEf2LKuC/66C0OL8o90S9L579NZ+oQIRoHJwagyo=",
+  "Source": "BreakoutOnline",
+  "BasePath": "_content/BreakoutOnline",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "BreakoutOnline\\wwwroot",
+      "Source": "BreakoutOnline",
+      "ContentRoot": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\",
+      "BasePath": "_content/BreakoutOnline",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\game-client.js",
+      "SourceId": "BreakoutOnline",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\",
+      "BasePath": "_content/BreakoutOnline",
+      "RelativePath": "game-client.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\game-client.js"
+    },
+    {
+      "Identity": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\index.html",
+      "SourceId": "BreakoutOnline",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\",
+      "BasePath": "_content/BreakoutOnline",
+      "RelativePath": "index.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    },
+    {
+      "Identity": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\powerups.js",
+      "SourceId": "BreakoutOnline",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\carlo\\OneDrive\\Área de Trabalho\\CURSOS\\Projetos\\jogo1 teste\\jogo1 teste\\wwwroot\\",
+      "BasePath": "_content/BreakoutOnline",
+      "RelativePath": "powerups.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\powerups.js"
+    }
+  ]
+}
