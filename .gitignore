@@ -1,0 +1,12 @@
+# Pasta do Visual Studio
+.vs/
+
+# Pastas de Build e Cache do C#
+[Bb]in/
+[Oo]bj/
+
+# Arquivos de usuário e temporários
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
