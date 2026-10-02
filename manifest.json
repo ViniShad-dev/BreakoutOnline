@@ -1,0 +1,4 @@
+{
+  "name":"Vini para Line","short_name":"Vini ♥ Line","description":"Um pequeno jogo de carinho.","start_url":"./","scope":"./","display":"standalone","orientation":"portrait-primary","background_color":"#090b25","theme_color":"#090b25",
+  "icons":[{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
